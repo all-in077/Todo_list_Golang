@@ -1,10 +1,10 @@
-package todo
+package tasks
 
 import (
 	"fmt"
 )
 
-type Tags string //Перечисление для тегов
+type Tags string // Перечисление для тегов
 const (
 	None      Tags = ""
 	Study     Tags = "study"
@@ -18,13 +18,13 @@ type Task struct {
 	TodoData string //Самма информацию про задачу - что надо сдедать
 	TagData  Tags   ////Тег задачи - по умлочанию none - не забудь пропистаь в конструкторе (идея напистаь один конструктор через функциональные параметры)
 	IsDone   bool   //Сделана ли задача - поле статуса ??? - надо еще подумать
+
 }
 
 type TodoList struct {
 	Len        int
 	Daily_list []Task
-	Daily_map  map[int]Task //Не забыть в main явно прописать её при создании пустого списка через : чтоб не было ошибки работы с nil мап
-
+	Daily_map  map[int]Task // Не забыть в main явно прописать её при создании пустого списка через : чтоб не было ошибки работы с nil мап
 }
 
 func NewTodoList() *TodoList { //Чтобы не было ошибки записи в nil map
@@ -37,7 +37,6 @@ func (v *TodoList) Add(par1 Task) { //Проверку на ошибку и ва
 	v.Daily_list = append(v.Daily_list, par1)
 	v.Daily_map[v.Len] = par1
 	v.Len++
-
 }
 
 func (v *TodoList) List() {
@@ -52,7 +51,6 @@ func (v *TodoList) List() {
 			fmt.Printf("Status: Done\n")
 		} else {
 			fmt.Printf("Status: Not done yet\n")
-
 		}
 	}
 }
@@ -60,7 +58,6 @@ func (v *TodoList) List() {
 func (v *TodoList) Update(par1 Task, ind int) {
 	v.Daily_list[ind] = par1
 	v.Daily_map[ind] = par1
-
 }
 
 func (v *TodoList) Delete(ind int) {

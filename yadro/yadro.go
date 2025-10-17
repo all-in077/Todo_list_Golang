@@ -1,14 +1,14 @@
 package yadro
 
 import (
-	"Project_one/todo"
+	todo "Project_one/tasks"
 	"errors"
 	"fmt"
 	"strconv"
 	"strings"
 )
 
-type Comands string //Алиасы команд
+type Comands string // Алиасы команд
 const (
 	add_task    Comands = "at"
 	show_list   Comands = "lt"
@@ -51,7 +51,6 @@ func ShowInformation() { //Функция на help коотрая будет в
 	fmt.Println("Available tags: study, housework, finance, health, work or nothing")
 	fmt.Println("Available status: done, not done yet")
 	fmt.Println("In <> you have the required arguments, and in [] optional, if you want to skip them print ---")
-
 }
 
 func CheckTag(arg string) string {
@@ -151,7 +150,6 @@ func (v *DeleteCommand) Run(args []string, ourtodolist *todo.TodoList) error {
 	ourtodolist.Delete(ind)
 	v.commoninfo = strings.Join(args, " ")
 	return nil
-
 }
 
 func NewCLIYadro() *CLIYadro { //Конструктор чтоб не работать с nil указателем
@@ -163,7 +161,6 @@ func NewCLIYadro() *CLIYadro { //Конструктор чтоб не работ
 }
 
 func (v *CLIYadro) ParsAndRunCommand(args []string) error {
-
 	comm := args[0]
 	switch comm {
 	case "at":

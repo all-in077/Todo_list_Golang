@@ -9,14 +9,12 @@ import (
 )
 
 func main() {
-
 	var res = yadro.NewCLIYadro()
-
 	scanner := bufio.NewScanner(os.Stdin) //Запустим сканнер
 	for scanner.Scan() {
-		text := scanner.Text() //text - это простой string
+		text := scanner.Text() // text - это простой string
 
-		if text == "" || text == "exit" { //Если введем пустую строку то ввод так же завершится
+		if text == "" || text == "exit" { // Если введем пустую строку то ввод так же завершится
 			break
 		}
 
