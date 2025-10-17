@@ -9,14 +9,13 @@ import (
 )
 
 func main() {
+	res := yadro.NewCLI_Yadro()
 
-	var res = yadro.NewCLI_Yadro()
-
-	scanner := bufio.NewScanner(os.Stdin) //Запустим сканнер
+	scanner := bufio.NewScanner(os.Stdin) // Запустим сканнер
 	for scanner.Scan() {
-		text := scanner.Text() //text - это простой string
+		text := scanner.Text() // text - это простой string
 
-		if text == "" || text == "exit" { //Если введем пустую строку то ввод так же завершится
+		if text == "" || text == "exit" { // Если введем пустую строку то ввод так же завершится
 			break
 		}
 
@@ -26,7 +25,7 @@ func main() {
 		}
 
 		//<Command>
-		words_buff := strings.Fields(text) //массив строковых аргументов
+		words_buff := strings.Fields(text) // массив строковых аргументов
 		err := res.Pars_and_run_command(words_buff)
 		if err != nil {
 			fmt.Println(err)

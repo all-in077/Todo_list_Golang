@@ -1,14 +1,14 @@
 package yadro
 
 import (
-	"Project_one/todo"
+	todo "Project_one/tasks"
 	"errors"
 	"fmt"
 	"strconv"
 	"strings"
 )
 
-type Comands string //Алиасы команд
+type Comands string // Алиасы команд
 const (
 	add_task    Comands = "at"
 	show_list   Comands = "lt"
@@ -16,7 +16,7 @@ const (
 	delete_task Comands = "dt"
 )
 
-func Show_information() { //Функция на help коотрая будет выводить информацию о командах
+func Show_information() { // Функция на help коотрая будет выводить информацию о командах
 	fmt.Println("Information about commands:")
 	fmt.Println("To add task write:  at [tag] [task]")
 	fmt.Println("To show the list write:  lt")
@@ -25,11 +25,10 @@ func Show_information() { //Функция на help коотрая будет �
 	fmt.Println("Available tags: study, housework, finance, health, work or nothing")
 	fmt.Println("Available status: done, not done yet")
 	fmt.Println("In <> you have the required arguments, and in [] optional, if you want to skip them print ---")
-
 }
 
 func Check_tag(arg string) string {
-	switch todo.Tags(arg) { //Проверили тег на валидность
+	switch todo.Tags(arg) { // Проверили тег на валидность
 	case "---":
 		return string(todo.None)
 	case todo.Study:
@@ -56,7 +55,7 @@ type Add_commannd struct {
 }
 
 // Формат: at [tag] [task], если что то отстутвует - то писать надо ---
-func (v *Add_commannd) Run(args []string) error { //Первый аргумент - тег (если он есть) Если его нет, передается None и мы продолжаем работу, если он не валидный выбрасываем ошибку сообщением
+func (v *Add_commannd) Run(args []string) error { // Первый аргумент - тег (если он есть) Если его нет, передается None и мы продолжаем работу, если он не валидный выбрасываем ошибку сообщением
 	info_tag := Check_tag(args[0])
 	if info_tag == "<->" {
 		return errors.New("uknown tag, please choose one of the available ones")
@@ -65,7 +64,7 @@ func (v *Add_commannd) Run(args []string) error { //Первый аргумен�
 	format_task.Tag_data = todo.Tags(info_tag)
 	info := strings.Join(args[1:], " ")
 	format_task.Todo_data = info
-	our_todo_list.Add(format_task) //Добавим задачу к нашему списку
+	our_todo_list.Add(format_task) // Добавим задачу к нашему списку
 	v.common_info = strings.Join(args, " ")
 	return nil
 }
@@ -86,7 +85,7 @@ type Update_task_command struct {
 }
 
 // ut <index> [status] [task], если что то отстутвует - то писать надо ---
-func (v *Update_task_command) Run(args []string) error { //Формат ввода: <Номер задачи - Ind> [New status] [New data]  пропуск необязательного параметра симво "---"
+func (v *Update_task_command) Run(args []string) error { // Формат ввода: <Номер задачи - Ind> [New status] [New data]  пропуск необязательного параметра симво "---"
 	if len(args) < 2 {
 		return errors.New("please make the update by format")
 	}
@@ -145,7 +144,6 @@ func (v *Delete_command) Run(args []string) error {
 	our_todo_list.Delete(ind)
 	v.common_info = strings.Join(args, " ")
 	return nil
-
 }
 
 type CLI_Yadro struct {
@@ -154,8 +152,8 @@ type CLI_Yadro struct {
 	our_todo_list   *todo.Todo_list
 }
 
-func NewCLI_Yadro() *CLI_Yadro { //Конструктор чтоб не работать с nil указателем
-	var m = todo.NewTodo_list()
+func NewCLI_Yadro() *CLI_Yadro { // Конструктор чтоб не работать с nil указателем
+	m := todo.NewTodo_list()
 	return &CLI_Yadro{
 		map_of_commands: make(map[int]Command),
 		our_todo_list:   m,
@@ -163,7 +161,6 @@ func NewCLI_Yadro() *CLI_Yadro { //Конструктор чтоб не рабо
 }
 
 func (v *CLI_Yadro) Pars_and_run_command(args []string) error {
-
 	comm := args[0]
 	switch comm {
 	case "at":
@@ -174,7 +171,7 @@ func (v *CLI_Yadro) Pars_and_run_command(args []string) error {
 			return err
 		}
 		param.common_info = strings.Join(args, " ")
-		v.map_of_commands[v.len_of_the_map+1] = &param //Тонкйи момент-всё из за того что метод принимает указательна структуру
+		v.map_of_commands[v.len_of_the_map+1] = &param // Тонкйи момент-всё из за того что метод принимает указательна структуру
 		v.len_of_the_map += 1
 		return nil
 	case "lt":
@@ -213,4 +210,4 @@ func (v *CLI_Yadro) Pars_and_run_command(args []string) error {
 	}
 }
 
-var our_todo_list = todo.NewTodo_list() //Сам список с которым буждем работать
+var our_todo_list = todo.NewTodo_list() // Сам список с которым буждем работать
