@@ -16,7 +16,33 @@ const (
 	delete_task Comands = "dt"
 )
 
-func Show_information() { //Функция на help коотрая будет выводить информацию о командах
+type Command interface {
+	Run(args []string, ourtodolist *todo.TodoList) error
+}
+
+type AddCommand struct {
+	commoninfo string
+}
+
+type ShowListCommand struct {
+	commoninfo string
+}
+
+type UpdateTaskCommand struct {
+	commoninfo string
+}
+
+type DeleteCommand struct {
+	commoninfo string
+}
+
+type CLIYadro struct {
+	mapOfCommands map[int]Command
+	lenOfTheMap   int
+	ourtodolist   todo.TodoList
+}
+
+func ShowInformation() { //Функция на help коотрая будет выводить информацию о командах
 	fmt.Println("Information about commands:")
 	fmt.Println("To add task write:  at [tag] [task]")
 	fmt.Println("To show the list write:  lt")
@@ -28,7 +54,7 @@ func Show_information() { //Функция на help коотрая будет �
 
 }
 
-func Check_tag(arg string) string {
+func CheckTag(arg string) string {
 	switch todo.Tags(arg) { //Проверили тег на валидность
 	case "---":
 		return string(todo.None)
@@ -47,46 +73,30 @@ func Check_tag(arg string) string {
 	}
 }
 
-type Command interface {
-	Run(args []string) error
-}
-
-type Add_commannd struct {
-	common_info string
-}
-
 // Формат: at [tag] [task], если что то отстутвует - то писать надо ---
-func (v *Add_commannd) Run(args []string) error { //Первый аргумент - тег (если он есть) Если его нет, передается None и мы продолжаем работу, если он не валидный выбрасываем ошибку сообщением
-	info_tag := Check_tag(args[0])
+func (v *AddCommand) Run(args []string, ourtodolist *todo.TodoList) error { //Первый аргумент - тег (если он есть) Если его нет, передается None и мы продолжаем работу, если он не валидный выбрасываем ошибку сообщением
+	info_tag := CheckTag(args[0])
 	if info_tag == "<->" {
 		return errors.New("uknown tag, please choose one of the available ones")
 	}
 	var format_task todo.Task
-	format_task.Tag_data = todo.Tags(info_tag)
+	format_task.TagData = todo.Tags(info_tag)
 	info := strings.Join(args[1:], " ")
-	format_task.Todo_data = info
-	our_todo_list.Add(format_task) //Добавим задачу к нашему списку
-	v.common_info = strings.Join(args, " ")
+	format_task.TodoData = info
+	ourtodolist.Add(format_task) //Добавим задачу к нашему списку
+	v.commoninfo = strings.Join(args, " ")
 	return nil
 }
 
-type Show_list_command struct {
-	common_info string
-}
-
-// lt - можно добавить чтоб выводил как срез 1:4 к примеру
-func (v *Show_list_command) Run(args []string) error {
-	our_todo_list.List()
-	v.common_info = strings.Join(args, " ")
+// lt
+func (v *ShowListCommand) Run(args []string, ourtodolist *todo.TodoList) error {
+	ourtodolist.List()
+	v.commoninfo = strings.Join(args, " ")
 	return nil
-}
-
-type Update_task_command struct {
-	common_info string
 }
 
 // ut <index> [status] [task], если что то отстутвует - то писать надо ---
-func (v *Update_task_command) Run(args []string) error { //Формат ввода: <Номер задачи - Ind> [New status] [New data]  пропуск необязательного параметра симво "---"
+func (v *UpdateTaskCommand) Run(args []string, ourtodolist *todo.TodoList) error { //Формат ввода: <Номер задачи - Ind> [New status] [New data]  пропуск необязательного параметра симво "---"
 	if len(args) < 2 {
 		return errors.New("please make the update by format")
 	}
@@ -94,7 +104,7 @@ func (v *Update_task_command) Run(args []string) error { //Формат ввод
 	if err != nil {
 		return errors.New("please enter the index")
 	}
-	if ind > our_todo_list.Len {
+	if ind > ourtodolist.Len {
 		return errors.New("index of the task is out of range")
 	}
 	ind -= 1
@@ -103,11 +113,11 @@ func (v *Update_task_command) Run(args []string) error { //Формат ввод
 
 	switch args[1] {
 	case "done":
-		format_task.Is_done = true
+		format_task.IsDone = true
 	case "not done yet":
-		format_task.Is_done = false
+		format_task.IsDone = false
 	case "---":
-		format_task.Is_done = our_todo_list.Daily_map[ind].Is_done
+		format_task.IsDone = ourtodolist.Daily_map[ind].IsDone
 	default:
 		return errors.New("please chose one of the available status")
 	}
@@ -116,101 +126,89 @@ func (v *Update_task_command) Run(args []string) error { //Формат ввод
 	}
 
 	if args[2] != "---" {
-		format_task.Todo_data = strings.Join(args[2:], " ")
+		format_task.TodoData = strings.Join(args[2:], " ")
 	} else {
-		format_task.Todo_data = our_todo_list.Daily_map[ind].Todo_data
+		format_task.TodoData = ourtodolist.Daily_map[ind].TodoData
 	}
 
-	our_todo_list.Update(format_task, ind)
-	v.common_info = strings.Join(args, " ")
+	ourtodolist.Update(format_task, ind)
+	v.commoninfo = strings.Join(args, " ")
 	return nil
 }
 
-type Delete_command struct {
-	common_info string
-}
-
 // dt <ind> ind- индекс задачи которую надо удалить
-func (v *Delete_command) Run(args []string) error {
+func (v *DeleteCommand) Run(args []string, ourtodolist *todo.TodoList) error {
 	ind, err := strconv.Atoi(args[0])
 	if err != nil {
 		return errors.New("please enter the index")
 	}
 
-	if ind > (our_todo_list.Len) {
+	if ind > (ourtodolist.Len) {
 		return errors.New("task index is out of range")
 	}
 	ind -= 1
 
-	our_todo_list.Delete(ind)
-	v.common_info = strings.Join(args, " ")
+	ourtodolist.Delete(ind)
+	v.commoninfo = strings.Join(args, " ")
 	return nil
 
 }
 
-type CLI_Yadro struct {
-	map_of_commands map[int]Command
-	len_of_the_map  int
-	our_todo_list   *todo.Todo_list
-}
-
-func NewCLI_Yadro() *CLI_Yadro { //Конструктор чтоб не работать с nil указателем
-	var m = todo.NewTodo_list()
-	return &CLI_Yadro{
-		map_of_commands: make(map[int]Command),
-		our_todo_list:   m,
+func NewCLIYadro() *CLIYadro { //Конструктор чтоб не работать с nil указателем
+	var m = todo.NewTodoList()
+	return &CLIYadro{
+		mapOfCommands: make(map[int]Command),
+		ourtodolist:   *m,
 	}
 }
 
-func (v *CLI_Yadro) Pars_and_run_command(args []string) error {
+func (v *CLIYadro) ParsAndRunCommand(args []string) error {
 
 	comm := args[0]
 	switch comm {
 	case "at":
-		var param Add_commannd
-		err := param.Run(args[1:])
+		var param AddCommand
+		err := param.Run(args[1:], &v.ourtodolist)
 		if err != nil {
 			fmt.Println("Error:")
 			return err
 		}
-		param.common_info = strings.Join(args, " ")
-		v.map_of_commands[v.len_of_the_map+1] = &param //Тонкйи момент-всё из за того что метод принимает указательна структуру
-		v.len_of_the_map += 1
+		param.commoninfo = strings.Join(args, " ")
+		v.mapOfCommands[v.lenOfTheMap+1] = &param //Тонкйи момент-всё из за того что метод принимает указательна структуру
+		v.lenOfTheMap += 1
 		return nil
 	case "lt":
-		var param Show_list_command
-		err := param.Run(args[1:])
+		var param ShowListCommand
+		err := param.Run(args[1:], &v.ourtodolist)
 		if err != nil {
 			return err
 		}
-		param.common_info = strings.Join(args, " ")
-		v.map_of_commands[v.len_of_the_map+1] = &param
-		v.len_of_the_map += 1
+		param.commoninfo = strings.Join(args, " ")
+		v.mapOfCommands[v.lenOfTheMap+1] = &param
+		v.lenOfTheMap += 1
 		return nil
 	case "ut":
-		var param Update_task_command
-		err := param.Run(args[1:])
+		var param UpdateTaskCommand
+		err := param.Run(args[1:], &v.ourtodolist)
 		if err != nil {
 			return err
 		}
-		param.common_info = strings.Join(args, " ")
-		v.map_of_commands[v.len_of_the_map+1] = &param
-		v.len_of_the_map += 1
+		param.commoninfo = strings.Join(args, " ")
+		v.mapOfCommands[v.lenOfTheMap+1] = &param
+		v.lenOfTheMap += 1
 		return nil
 	case "dt":
-		var param Delete_command
-		err := param.Run(args[1:])
+		var param DeleteCommand
+		err := param.Run(args[1:], &v.ourtodolist)
 		if err != nil {
 			return err
 		}
-		param.common_info = strings.Join(args, " ")
-		v.map_of_commands[v.len_of_the_map+1] = &param
-		v.len_of_the_map += 1
+		param.commoninfo = strings.Join(args, " ")
+		v.mapOfCommands[v.lenOfTheMap+1] = &param
+		v.lenOfTheMap += 1
 		return nil
 	default:
 		err := errors.New("error: Unacceptable command  please choose one of the available ones")
 		return err
 	}
 }
-
-var our_todo_list = todo.NewTodo_list() //Сам список с которым буждем работать

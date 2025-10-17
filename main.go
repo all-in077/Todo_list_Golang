@@ -10,7 +10,7 @@ import (
 
 func main() {
 
-	var res = yadro.NewCLI_Yadro()
+	var res = yadro.NewCLIYadro()
 
 	scanner := bufio.NewScanner(os.Stdin) //Запустим сканнер
 	for scanner.Scan() {
@@ -21,13 +21,13 @@ func main() {
 		}
 
 		if text == "help" || text == "Help" {
-			yadro.Show_information()
+			yadro.ShowInformation()
 			continue
 		}
 
 		//<Command>
-		words_buff := strings.Fields(text) //массив строковых аргументов
-		err := res.Pars_and_run_command(words_buff)
+		wordsBuff := strings.Fields(text) //массив строковых аргументов
+		err := res.ParsAndRunCommand(wordsBuff)
 		if err != nil {
 			fmt.Println(err)
 		}
